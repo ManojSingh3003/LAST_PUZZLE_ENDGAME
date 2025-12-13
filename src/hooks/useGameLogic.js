@@ -92,5 +92,5 @@ export function useGameLogic() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [grid, gameWon]);
 
-  return { grid, playerPos, gameWon };
+  return { grid, playerPos, gameWon ,drills};
 }

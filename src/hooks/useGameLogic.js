@@ -5,8 +5,9 @@ export function useGameLogic() {
   const [playerPos, setPlayerPos] = useState(0);
   const [gameWon, setGameWon] = useState(false);
 
- 
-  const [grid] = useState(() => {
+  const [drills,setDrills]=useState(1);
+
+  const [grid,setGrid] = useState(() => {
     const newGrid = Array(GRID_SIZE * GRID_SIZE).fill(CELL_TYPES.EMPTY);
     
 
@@ -46,6 +47,8 @@ export function useGameLogic() {
       }
 
       // --- Movement Logic ---
+      const isShiftHeld=e.shiftKey;
+
       setPlayerPos((curr) => {
         let next = curr;
         const row = Math.floor(curr / GRID_SIZE);
@@ -58,7 +61,23 @@ export function useGameLogic() {
 
         const nextCell = grid[next];
         // 1. Walls block you
-        if (nextCell === CELL_TYPES.WALL) return curr;
+        if (nextCell === CELL_TYPES.WALL) {
+          if(isShiftHeld){
+            if(drills>0){
+              setGrid((prevGrid) => {
+                const newGrid = [...prevGrid]; 
+                newGrid[next] = CELL_TYPES.EMPTY;
+                return newGrid;
+              });
+              setDrills((d)=>d-1);
+              return next;
+            }else{
+              return curr;
+            }
+          }else{
+            return curr;
+          }
+        }
         // 2. Portals allow you to STAND on them (No auto-teleport)
         if (nextCell === CELL_TYPES.PORTAL_A || nextCell === CELL_TYPES.PORTAL_B) {
             return next; 

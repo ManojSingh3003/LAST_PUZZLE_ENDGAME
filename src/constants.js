@@ -1,5 +1,10 @@
 export const GRID_SIZE = 20;
 
+export const MAX_DRILLS = 2;
+export const GAME_MODES = {
+  NO_WALL_BREAK: 'no-wall-break',
+  WALL_BREAK: 'wall-break',
+};
 export const CELL_TYPES = {
   EMPTY: 0,
   WALL: 1,

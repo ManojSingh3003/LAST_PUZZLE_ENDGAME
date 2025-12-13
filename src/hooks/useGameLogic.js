@@ -1,27 +1,40 @@
-import { useState, useEffect } from 'react';
-import { GRID_SIZE, CELL_TYPES } from '../constants';
+import { useState, useEffect ,useCallback} from 'react';
+import { GRID_SIZE, CELL_TYPES ,GAME_MODES,MAX_DRILLS} from '../constants';
+
+const createInitialGrid = () => {
+  const newGrid = Array(GRID_SIZE * GRID_SIZE).fill(CELL_TYPES.EMPTY);
+
+  newGrid[0] = CELL_TYPES.START;
+  newGrid[1] = CELL_TYPES.WALL;        // wall right
+  newGrid[21] = CELL_TYPES.WALL;       // wall below
+  newGrid[50] = CELL_TYPES.PORTAL_A;   // red1 portal
+  newGrid[150] = CELL_TYPES.PORTAL_A;  // red2 portal
+  newGrid[250] = CELL_TYPES.PORTAL_B;  // blue1 portal
+  newGrid[100] = CELL_TYPES.PORTAL_B;  // blue2 portal
+  newGrid[399] = CELL_TYPES.GOAL;      // yellow goal
+  
+  return newGrid;
+};
 
 export function useGameLogic() {
+  const [mode, setMode] = useState(GAME_MODES.WALL_BREAK);
   const [playerPos, setPlayerPos] = useState(0);
   const [gameWon, setGameWon] = useState(false);
+  const [grid, setGrid] = useState(createInitialGrid);
+  const [drills,setDrills]=useState(MAX_DRILLS);
 
-  const [drills,setDrills]=useState(1);
-
-  const [grid,setGrid] = useState(() => {
-    const newGrid = Array(GRID_SIZE * GRID_SIZE).fill(CELL_TYPES.EMPTY);
+  const switchMode = useCallback((newMode) => {
+    setMode(newMode);
+    setGameWon(false);
+    setPlayerPos(0);
+    setGrid(createInitialGrid()); 
     
-
-    newGrid[0] = CELL_TYPES.START;
-    newGrid[1] = CELL_TYPES.WALL;        // wall right
-    newGrid[21] = CELL_TYPES.WALL;       // wall below
-    newGrid[50] = CELL_TYPES.PORTAL_A;   // red1 portal
-    newGrid[150] = CELL_TYPES.PORTAL_A;  // red2 portal
-    newGrid[250] = CELL_TYPES.PORTAL_B;  // blue1 portal
-    newGrid[100] = CELL_TYPES.PORTAL_B;  // blue2 portal
-    newGrid[399] = CELL_TYPES.GOAL;      // yellow goal
-    
-    return newGrid;
-  });
+    if (newMode === GAME_MODES.NO_WALL_BREAK) {
+      setDrills(0);
+    } else {
+      setDrills(MAX_DRILLS);
+    }
+  }, []);
 
   useEffect(() => {
     if (gameWon) return;
@@ -90,7 +103,7 @@ export function useGameLogic() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [grid, gameWon]);
+  }, [grid, gameWon,drills,playerPos]);
 
-  return { grid, playerPos, gameWon ,drills};
+  return { grid, playerPos, gameWon ,drills,mode,switchMode};
 }

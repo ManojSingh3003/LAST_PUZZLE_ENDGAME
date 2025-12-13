@@ -5,6 +5,6 @@ export const CELL_TYPES = {
   WALL: 1,
   START: 2,
   GOAL: 3,
-  PORTAL_A: 4, // Red Portal
-  PORTAL_B: 5, // Blue Portal
+  PORTAL_A: 4, // Red
+  PORTAL_B: 5, // Blue
 };

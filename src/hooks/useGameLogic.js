@@ -5,22 +5,22 @@ export function useGameLogic() {
   const [playerPos, setPlayerPos] = useState(0);
   const [gameWon, setGameWon] = useState(false);
 
-  // FIX: Initialize the grid IMMEDIATELY (Synchronously)
+ 
   const [grid] = useState(() => {
     const newGrid = Array(GRID_SIZE * GRID_SIZE).fill(CELL_TYPES.EMPTY);
     
-    // --- MAP SETUP ---
+
     newGrid[0] = CELL_TYPES.START;
-    newGrid[1] = CELL_TYPES.WALL;       // Wall to the right
-    newGrid[21] = CELL_TYPES.WALL;      // Wall below
-    newGrid[50] = CELL_TYPES.PORTAL_A;  // Red Portal
-    newGrid[150] = CELL_TYPES.PORTAL_B; // Blue Portal
-    newGrid[399] = CELL_TYPES.GOAL;     // Yellow Goal
+    newGrid[1] = CELL_TYPES.WALL;       // wall right
+    newGrid[21] = CELL_TYPES.WALL;      // wall below
+    newGrid[50] = CELL_TYPES.PORTAL_A;  // red portal
+    newGrid[150] = CELL_TYPES.PORTAL_B; // blue portal
+    newGrid[399] = CELL_TYPES.GOAL;     // yellow goal
     
     return newGrid;
   });
 
-  // Movement Logic
+  // movement
   useEffect(() => {
     if (gameWon) return;
 
@@ -35,7 +35,7 @@ export function useGameLogic() {
         if (e.key === 'ArrowLeft' && col > 0) next -= 1;
         if (e.key === 'ArrowRight' && col < GRID_SIZE - 1) next += 1;
 
-        // Collision Check
+        // if collision
         if (grid[next] !== CELL_TYPES.WALL) {
             if (grid[next] === CELL_TYPES.GOAL) setGameWon(true);
             return next;

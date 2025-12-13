@@ -12,7 +12,7 @@ export default function App() {
       
       {gameWon && (
         <div className="mb-6 p-4 bg-green-900/50 border border-green-500 text-green-300 rounded-lg text-2xl font-bold animate-bounce">
-          🎉 LEVEL COMPLETED! 🎉
+             LEVEL COMPLETED! 
         </div>
       )}
 

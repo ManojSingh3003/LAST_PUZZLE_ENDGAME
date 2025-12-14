@@ -1,5 +1,5 @@
-import { useState, useEffect ,useCallback,useRef} from 'react';
-import { GRID_SIZE, CELL_TYPES ,GAME_MODES,MAX_DRILLS} from '../constants';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { GRID_SIZE, CELL_TYPES, GAME_MODES, MAX_DRILLS } from '../constants';
 import { calculateLevelPar } from '../utils/pathfinding';
 
 const createInitialGrid = () => {
@@ -29,7 +29,12 @@ export function useGameLogic() {
   const [mode, setMode] = useState(GAME_MODES.WALL_BREAK);
   const [playerPos, setPlayerPos] = useState(0);
   const [gameWon, setGameWon] = useState(false);
+  
+  // --- Grid State ---
+  // We store 'originalGrid' to keep a clean copy of the map (with walls intact)
+  const [originalGrid, setOriginalGrid] = useState(createInitialGrid);
   const [grid, setGrid] = useState(createInitialGrid);
+
   const [levelMaxDrills, setLevelMaxDrills] = useState(MAX_DRILLS);
   const [drills, setDrills] = useState(MAX_DRILLS);
   const [visitedCells, setVisitedCells] = useState(new Set([0])); 
@@ -39,11 +44,15 @@ export function useGameLogic() {
 
   const timerRef = useRef(null);
 
+  // --- Switch Mode (Resets Game) ---
   const switchMode = useCallback((newMode) => {
     setMode(newMode);
     setGameWon(false);
-  
-    const startIdx = grid.indexOf(CELL_TYPES.START);
+    
+    // RESTORE GRID: Reset broken walls using the original clean copy
+    setGrid([...originalGrid]);
+
+    const startIdx = originalGrid.indexOf(CELL_TYPES.START);
     const safeStart = startIdx !== -1 ? startIdx : 0;
     
     setPlayerPos(safeStart);
@@ -58,16 +67,18 @@ export function useGameLogic() {
     } else {
       setDrills(levelMaxDrills); 
     }
-  }, [grid, levelMaxDrills]);
+  }, [originalGrid, levelMaxDrills]);
 
+  // --- Initial Calculation ---
   useEffect(() => {
-    const scores = calculateLevelPar(grid, MAX_DRILLS);
+    const scores = calculateLevelPar(originalGrid, MAX_DRILLS);
     setPar({ 
       noBreak: scores.minStepsNoBreak, 
       withBreak: scores.minStepsWithBreak 
     });
   }, []);
 
+  // --- Timer Logic ---
   useEffect(() => {
     if (startTime && !gameWon) {
       timerRef.current = setInterval(() => {
@@ -77,6 +88,7 @@ export function useGameLogic() {
     return () => clearInterval(timerRef.current);
   }, [startTime, gameWon]);
 
+  // --- Input Handling ---
   useEffect(() => {
     if (gameWon) {
       clearInterval(timerRef.current);
@@ -85,10 +97,12 @@ export function useGameLogic() {
 
     const handleKeyDown = (e) => {
       if (!startTime) setStartTime(Date.now());
+      
       // --- Teleport Logic ---
       if (e.key === 'Enter') {
         const currentCell = grid[playerPos];
         let dest = -1;
+
         if (currentCell === CELL_TYPES.PORTAL_A) {
            const allAs = grid.map((c, i) => c === CELL_TYPES.PORTAL_A ? i : -1).filter(i => i !== -1);
            dest = allAs.find(i => i !== playerPos);
@@ -96,6 +110,7 @@ export function useGameLogic() {
            const allBs = grid.map((c, i) => c === CELL_TYPES.PORTAL_B ? i : -1).filter(i => i !== -1);
            dest = allBs.find(i => i !== playerPos);
         }
+
         if (dest !== undefined && dest !== -1) {
            setPlayerPos(dest);
            setVisitedCells(prev => new Set(prev).add(dest));
@@ -105,16 +120,15 @@ export function useGameLogic() {
 
       // --- Movement Logic ---
       const isShiftHeld = e.shiftKey;
-      
       let next = playerPos;
       const row = Math.floor(playerPos / GRID_SIZE);
       const col = playerPos % GRID_SIZE;
 
-      
       if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') && row > 0) next -= GRID_SIZE;
       if ((e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') && row < GRID_SIZE - 1) next += GRID_SIZE;
       if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && col > 0) next -= 1;
       if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && col < GRID_SIZE - 1) next += 1;
+
       if (next === playerPos) return; 
 
       const nextCell = grid[next];
@@ -147,12 +161,15 @@ export function useGameLogic() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [grid, gameWon, drills, playerPos]);
+  }, [grid, gameWon, drills, playerPos, startTime]);
 
 
-  // ---Load Level Function ---
+  // --- Load Level Function ---
   const loadLevel = useCallback((newGridData, newKValue, initialMode) => {
-    setGrid(newGridData);
+    // Save Clean Copy AND Active Copy
+    setOriginalGrid(newGridData);
+    setGrid([...newGridData]); 
+    
     // Find start dynamically
     const startIdx = newGridData.indexOf(CELL_TYPES.START);
     const safeStart = startIdx !== -1 ? startIdx : 0;
@@ -181,5 +198,8 @@ export function useGameLogic() {
   }, [mode]);
 
 
-  return { grid, playerPos, gameWon, drills, mode, switchMode, uniqueSteps: visitedCells.size - 1, par, timeElapsed,loadLevel};
+  return { 
+    grid, playerPos, gameWon, drills, mode, switchMode, 
+    uniqueSteps: visitedCells.size - 1, par, timeElapsed, loadLevel 
+  };
 }

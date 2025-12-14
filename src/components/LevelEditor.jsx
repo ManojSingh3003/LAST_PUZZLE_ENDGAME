@@ -63,7 +63,6 @@ export default function LevelEditor({ onBack }) {
     // 3. Automatic Validation (Pathfinding)
     const scores = calculateLevelPar(grid, kValue);
     
-    // Reject if IMPOSSIBLE even with breaks
     if (scores.minStepsWithBreak === Infinity) {
       return setMessage("❌ Error: Map is impossible to solve! (Goal unreachable)");
     }

@@ -12,14 +12,14 @@ import {
 
 const LEADERBOARD_COLLECTION = "scores";
 
-
-export const saveScore = async (username, mode, steps, time) => {
+export const saveScore = async (username, mode, steps, time, levelId) => {
   try {
     await addDoc(collection(db, LEADERBOARD_COLLECTION), {
       username: username || "Anonymous", 
       mode: mode,
       uniqueSteps: steps,
-      timeElapsed: parseFloat(time), 
+      timeElapsed: parseFloat(time),
+      levelId: levelId || 'default', // Save the specific Level ID
       createdAt: serverTimestamp(),
     });
     return true;
@@ -29,11 +29,12 @@ export const saveScore = async (username, mode, steps, time) => {
   }
 };
 
-export const getLeaderboard = async (mode) => {
+export const getLeaderboard = async (mode, levelId) => {
   try {
     const q = query(
       collection(db, LEADERBOARD_COLLECTION),
       where("mode", "==", mode),
+      where("levelId", "==", levelId || 'default'), // Filter by Level ID
       orderBy("uniqueSteps", "asc"), 
       orderBy("timeElapsed", "asc"), 
       limit(10)

@@ -6,7 +6,6 @@ import { useGameLogic } from './hooks/useGameLogic';
 import { GAME_MODES } from './constants';
 import { saveScore, getLeaderboard } from './services/leaderboard';
 
-
 const VIEWS = {
   MENU: 'MENU',
   GAME: 'GAME',
@@ -20,7 +19,7 @@ export default function App() {
   // --- Game Logic Hooks ---
   const { 
     grid, playerPos, gameWon, drills, mode, switchMode, 
-    uniqueSteps, par, timeElapsed, loadLevel 
+    uniqueSteps, par, timeElapsed, loadLevel, loadClassicLevel, currentLevelId 
   } = useGameLogic();
 
   // --- UI State: Leaderboard & Scoring ---
@@ -35,22 +34,30 @@ export default function App() {
 
   // --- View & Data Handlers ---
 
-  const handleStartGame = () => setCurrentView(VIEWS.GAME);
+  const handleStartGame = () => {
+    loadClassicLevel(); // Reset to default map
+    setCurrentView(VIEWS.GAME);
+  };
   const handleOpenEditor = () => setCurrentView(VIEWS.EDITOR);
   const handleOpenBrowser = () => setCurrentView(VIEWS.BROWSER);
   const handleBackToMenu = () => setCurrentView(VIEWS.MENU);
 
   const handlePlayLevel = (levelData, chosenMode) => {
-    loadLevel(levelData.grid, levelData.kValue, chosenMode); 
+    // Pass Level ID to loadLevel
+    loadLevel(levelData.grid, levelData.kValue, chosenMode, levelData.id); 
     setCurrentView(VIEWS.GAME);
   };
 
   // --- Effects ---
-  useEffect(() => { if (showLeaderboard) loadLeaderboard(); }, [showLeaderboard, mode]);
+  useEffect(() => { 
+    if (showLeaderboard) loadLeaderboard(); 
+  }, [showLeaderboard, mode, currentLevelId]); // Reload when map changes
+
   useEffect(() => { setHasSaved(false); setUsername(''); }, [gameWon, mode]);
   
   const loadLeaderboard = async () => {
-    const scores = await getLeaderboard(mode);
+    // Fetch scores specific to this map ID
+    const scores = await getLeaderboard(mode, currentLevelId);
     setLeaderboardData(scores);
   };
 
@@ -58,7 +65,8 @@ export default function App() {
     if (!username.trim()) return;
     setIsSubmitting(true);
 
-    const success = await saveScore(username, mode, uniqueSteps, timeElapsed);
+    // Save score with Level ID
+    const success = await saveScore(username, mode, uniqueSteps, timeElapsed, currentLevelId);
     if (success) { setHasSaved(true); if (showLeaderboard) loadLeaderboard(); }
     setIsSubmitting(false);
   };
@@ -100,17 +108,18 @@ export default function App() {
     <div className="flex flex-col items-center justify-center min-h-screen text-white bg-gray-950 p-4">
       <div className="flex w-full max-w-2xl justify-between items-center mb-4">
         <button onClick={handleBackToMenu} className="text-gray-400 hover:text-white">← Main Menu</button>
-        <h1 className="text-2xl font-bold tracking-widest text-purple-400">LAST_PUZZLE</h1>
+        <h1 className="text-2xl font-bold tracking-widest text-purple-400">
+          {currentLevelId === 'default' ? "CLASSIC MODE" : "COMMUNITY MAP"}
+        </h1>
         <div className="w-20"></div>
       </div>
 
       {/* --- Mode Switching Controls --- */}
       <div className="flex flex-wrap gap-4 mb-6 justify-center">
         <div className="flex gap-2 bg-gray-900 p-2 rounded-xl border border-gray-800">
-          {/* Button 1: No Wall Break (Disabled if Impossible) */}
+          {/* Button 1: No Wall Break */}
           <button
             onClick={() => switchMode(GAME_MODES.NO_WALL_BREAK)}
-            
             disabled={par.noBreak === Infinity || par.noBreak === -1}
             className={`px-4 py-2 rounded-lg font-bold transition-all ${
               mode === GAME_MODES.NO_WALL_BREAK 
@@ -144,13 +153,17 @@ export default function App() {
       {/* --- Leaderboard Modal --- */}
       {showLeaderboard && (
         <div className="mb-8 w-full max-w-2xl bg-gray-900/90 border border-purple-500 rounded-xl p-6 shadow-2xl z-10 absolute top-20">
-          <h2 className="text-2xl font-bold mb-4 text-center text-purple-300">🏆 Leaderboard</h2>
+          <h2 className="text-2xl font-bold mb-4 text-center text-purple-300">
+             {currentLevelId === 'default' ? "🏆 Classic Leaderboard" : "🏆 Map Leaderboard"}
+          </h2>
           <table className="w-full text-left text-sm">
             <thead><tr className="text-gray-400 border-b border-gray-700"><th>Rank</th><th>Player</th><th className="text-right">Steps</th><th className="text-right">Time</th></tr></thead>
             <tbody>
-              {leaderboardData.map((s, i) => (
+              {leaderboardData.length > 0 ? leaderboardData.map((s, i) => (
                 <tr key={s.id} className="border-b border-gray-800"><td className="p-2">#{i+1}</td><td className="p-2">{s.username}</td><td className="p-2 text-right text-green-400">{s.uniqueSteps}</td><td className="p-2 text-right text-yellow-400">{formatTime(s.timeElapsed)}s</td></tr>
-              ))}
+              )) : (
+                <tr><td colSpan="4" className="text-center p-4 text-gray-500">No scores yet for this map. Be the first!</td></tr>
+              )}
             </tbody>
           </table>
           <button onClick={() => setShowLeaderboard(false)} className="mt-4 w-full bg-gray-700 py-2 rounded">Close</button>

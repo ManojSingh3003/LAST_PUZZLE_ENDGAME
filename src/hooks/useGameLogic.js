@@ -30,6 +30,9 @@ export function useGameLogic() {
   const [playerPos, setPlayerPos] = useState(0);
   const [gameWon, setGameWon] = useState(false);
   
+  // NEW: Track current Level ID (default is 'default')
+  const [currentLevelId, setCurrentLevelId] = useState('default');
+
   // --- Grid State ---
   // We store 'originalGrid' to keep a clean copy of the map (with walls intact)
   const [originalGrid, setOriginalGrid] = useState(createInitialGrid);
@@ -165,7 +168,10 @@ export function useGameLogic() {
 
 
   // --- Load Level Function ---
-  const loadLevel = useCallback((newGridData, newKValue, initialMode) => {
+  // CHANGE: Added 'newLevelId' argument
+  const loadLevel = useCallback((newGridData, newKValue, initialMode, newLevelId) => {
+    setCurrentLevelId(newLevelId || 'default'); // Set the Level ID
+
     // Save Clean Copy AND Active Copy
     setOriginalGrid(newGridData);
     setGrid([...newGridData]); 
@@ -197,9 +203,16 @@ export function useGameLogic() {
     });
   }, [mode]);
 
+  // NEW: Helper to load Classic Level
+  const loadClassicLevel = useCallback(() => {
+    const classicGrid = createInitialGrid();
+    // Default ID is 'default'
+    loadLevel(classicGrid, MAX_DRILLS, GAME_MODES.WALL_BREAK, 'default');
+  }, [loadLevel]);
 
   return { 
     grid, playerPos, gameWon, drills, mode, switchMode, 
-    uniqueSteps: visitedCells.size - 1, par, timeElapsed, loadLevel 
+    uniqueSteps: visitedCells.size - 1, par, timeElapsed, 
+    loadLevel, loadClassicLevel, currentLevelId // Export currentLevelId
   };
 }

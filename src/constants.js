@@ -13,3 +13,12 @@ export const CELL_TYPES = {
   PORTAL_A: 4, // Red
   PORTAL_B: 5, // Blue
 };
+
+export const PORTAL_PAIRS = {
+  // Red Portals
+  47: 58,
+  58: 47,
+  // Blue Portals
+  7: 34,
+  34: 7
+};

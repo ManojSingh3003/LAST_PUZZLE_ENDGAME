@@ -1,4 +1,4 @@
-import { useState, useEffect ,useCallback} from 'react';
+import { useState, useEffect ,useCallback,useRef} from 'react';
 import { GRID_SIZE, CELL_TYPES ,GAME_MODES,MAX_DRILLS,PORTAL_PAIRS} from '../constants';
 import { calculateLevelPar } from '../utils/pathfinding';
 
@@ -31,14 +31,21 @@ export function useGameLogic() {
   const [gameWon, setGameWon] = useState(false);
   const [grid, setGrid] = useState(createInitialGrid);
   const [drills,setDrills]=useState(MAX_DRILLS);
-  const [moves, setMoves] = useState(0);
+  const [visitedCells, setVisitedCells] = useState(new Set([0])); 
+  const [startTime, setStartTime] = useState(null);
+  const [timeElapsed, setTimeElapsed] = useState(0);
   const [par, setPar] = useState({ noBreak: 0, withBreak: 0 });
+
+  const timerRef = useRef(null);
 
   const switchMode = useCallback((newMode) => {
     setMode(newMode);
     setGameWon(false);
     setPlayerPos(0);
-    setMoves(0);
+    setTimeElapsed(0);
+    setStartTime(null);
+    setVisitedCells(new Set([0]));
+    if (timerRef.current) clearInterval(timerRef.current);
 
     const newGrid = createInitialGrid();
     setGrid(newGrid);
@@ -65,14 +72,28 @@ export function useGameLogic() {
   }, []);
 
   useEffect(() => {
-    if (gameWon) return;
+    if (startTime && !gameWon) {
+      timerRef.current = setInterval(() => {
+        setTimeElapsed((Date.now() - startTime) / 1000);
+      }, 100);
+    }
+    return () => clearInterval(timerRef.current);
+  }, [startTime, gameWon]);
+
+  useEffect(() => {
+    if (gameWon) {
+      clearInterval(timerRef.current);
+        return;
+    }
 
     const handleKeyDown = (e) => {
+      if (!startTime) setStartTime(Date.now());
       // --- Teleport Logic ---
       if (e.key === 'Enter') {
         if (PORTAL_PAIRS[playerPos] !== undefined) {
-           setPlayerPos(PORTAL_PAIRS[playerPos]);
-           setMoves(m => m + 1);
+           const dest = PORTAL_PAIRS[playerPos];
+           setPlayerPos(dest);
+           setVisitedCells(prev => new Set(prev).add(dest));
         }
         return; 
       }
@@ -112,7 +133,7 @@ export function useGameLogic() {
       }
 
       if (moved) {
-        setMoves(m => m + 1);
+        setVisitedCells(prev => new Set(prev).add(next));
         if (grid[next] === CELL_TYPES.GOAL || nextCell === CELL_TYPES.GOAL) {
              setGameWon(true);
         }
@@ -123,6 +144,6 @@ export function useGameLogic() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [grid, gameWon, drills, playerPos]);
 
-  // 5. FIX: Export 'moves' and 'par' so App.jsx can see them
-  return { grid, playerPos, gameWon, drills, mode, switchMode, moves, par };
+  
+  return { grid, playerPos, gameWon, drills, mode, switchMode, uniqueSteps: visitedCells.size - 1, par, timeElapsed};
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect ,useCallback,useRef} from 'react';
-import { GRID_SIZE, CELL_TYPES ,GAME_MODES,MAX_DRILLS,PORTAL_PAIRS} from '../constants';
+import { GRID_SIZE, CELL_TYPES ,GAME_MODES,MAX_DRILLS} from '../constants';
 import { calculateLevelPar } from '../utils/pathfinding';
 
 const createInitialGrid = () => {
@@ -30,7 +30,8 @@ export function useGameLogic() {
   const [playerPos, setPlayerPos] = useState(0);
   const [gameWon, setGameWon] = useState(false);
   const [grid, setGrid] = useState(createInitialGrid);
-  const [drills,setDrills]=useState(MAX_DRILLS);
+  const [levelMaxDrills, setLevelMaxDrills] = useState(MAX_DRILLS);
+  const [drills, setDrills] = useState(MAX_DRILLS);
   const [visitedCells, setVisitedCells] = useState(new Set([0])); 
   const [startTime, setStartTime] = useState(null);
   const [timeElapsed, setTimeElapsed] = useState(0);
@@ -41,27 +42,23 @@ export function useGameLogic() {
   const switchMode = useCallback((newMode) => {
     setMode(newMode);
     setGameWon(false);
-    setPlayerPos(0);
+  
+    const startIdx = grid.indexOf(CELL_TYPES.START);
+    const safeStart = startIdx !== -1 ? startIdx : 0;
+    
+    setPlayerPos(safeStart);
     setTimeElapsed(0);
     setStartTime(null);
-    setVisitedCells(new Set([0]));
+    setVisitedCells(new Set([safeStart]));
+    
     if (timerRef.current) clearInterval(timerRef.current);
 
-    const newGrid = createInitialGrid();
-    setGrid(newGrid);
-
-    const scores = calculateLevelPar(newGrid, MAX_DRILLS);
-    setPar({ 
-      noBreak: scores.minStepsNoBreak, 
-      withBreak: scores.minStepsWithBreak 
-    });
-    
     if (newMode === GAME_MODES.NO_WALL_BREAK) {
       setDrills(0);
     } else {
-      setDrills(MAX_DRILLS);
+      setDrills(levelMaxDrills); 
     }
-  }, []);
+  }, [grid, levelMaxDrills]);
 
   useEffect(() => {
     const scores = calculateLevelPar(grid, MAX_DRILLS);
@@ -90,8 +87,16 @@ export function useGameLogic() {
       if (!startTime) setStartTime(Date.now());
       // --- Teleport Logic ---
       if (e.key === 'Enter') {
-        if (PORTAL_PAIRS[playerPos] !== undefined) {
-           const dest = PORTAL_PAIRS[playerPos];
+        const currentCell = grid[playerPos];
+        let dest = -1;
+        if (currentCell === CELL_TYPES.PORTAL_A) {
+           const allAs = grid.map((c, i) => c === CELL_TYPES.PORTAL_A ? i : -1).filter(i => i !== -1);
+           dest = allAs.find(i => i !== playerPos);
+        } else if (currentCell === CELL_TYPES.PORTAL_B) {
+           const allBs = grid.map((c, i) => c === CELL_TYPES.PORTAL_B ? i : -1).filter(i => i !== -1);
+           dest = allBs.find(i => i !== playerPos);
+        }
+        if (dest !== undefined && dest !== -1) {
            setPlayerPos(dest);
            setVisitedCells(prev => new Set(prev).add(dest));
         }
@@ -144,6 +149,37 @@ export function useGameLogic() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [grid, gameWon, drills, playerPos]);
 
-  
-  return { grid, playerPos, gameWon, drills, mode, switchMode, uniqueSteps: visitedCells.size - 1, par, timeElapsed};
+
+  // ---Load Level Function ---
+  const loadLevel = useCallback((newGridData, newKValue, initialMode) => {
+    setGrid(newGridData);
+    // Find start dynamically
+    const startIdx = newGridData.indexOf(CELL_TYPES.START);
+    const safeStart = startIdx !== -1 ? startIdx : 0;
+
+    setPlayerPos(safeStart);
+    setGameWon(false);
+    setTimeElapsed(0);
+    setStartTime(null);
+    setVisitedCells(new Set([safeStart]));
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    // Update K 
+    const k = parseInt(newKValue) || 0;
+    setLevelMaxDrills(k); 
+
+    const targetMode = initialMode || mode;
+    setMode(targetMode);
+    
+    setDrills(targetMode === GAME_MODES.NO_WALL_BREAK ? 0 : k);
+
+    const scores = calculateLevelPar(newGridData, k);
+    setPar({ 
+      noBreak: scores.minStepsNoBreak, 
+      withBreak: scores.minStepsWithBreak 
+    });
+  }, [mode]);
+
+
+  return { grid, playerPos, gameWon, drills, mode, switchMode, uniqueSteps: visitedCells.size - 1, par, timeElapsed,loadLevel};
 }

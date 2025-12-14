@@ -5,14 +5,28 @@ const createInitialGrid = () => {
   const newGrid = Array(GRID_SIZE * GRID_SIZE).fill(CELL_TYPES.EMPTY);
 
   newGrid[0] = CELL_TYPES.START;
-  newGrid[1] = CELL_TYPES.WALL;        // wall right
-  newGrid[21] = CELL_TYPES.WALL;       // wall below
-  newGrid[50] = CELL_TYPES.PORTAL_A;   // red1 portal
-  newGrid[150] = CELL_TYPES.PORTAL_A;  // red2 portal
-  newGrid[250] = CELL_TYPES.PORTAL_B;  // blue1 portal
-  newGrid[100] = CELL_TYPES.PORTAL_B;  // blue2 portal
-  newGrid[399] = CELL_TYPES.GOAL;      // yellow goal
-  
+  newGrid[63] = CELL_TYPES.GOAL;
+
+  newGrid[7] = CELL_TYPES.PORTAL_B;
+  newGrid[34] = CELL_TYPES.PORTAL_B;
+  newGrid[58] = CELL_TYPES.PORTAL_A;
+  newGrid[47] = CELL_TYPES.PORTAL_A;
+
+  const walls = [
+    1, 5,
+    9, 11, 15,
+    19, 21, 22, 23,
+    25, 26, 27, 28,
+    32, 33, 35, 37,
+    43, 46,
+    49, 50, 51, 52, 53, 54,
+    59
+  ];
+
+  walls.forEach(index => {
+    newGrid[index] = CELL_TYPES.WALL;
+  });
+
   return newGrid;
 };
 
@@ -47,11 +61,11 @@ export function useGameLogic() {
           const currentCell = grid[curr];
 
           if (currentCell === CELL_TYPES.PORTAL_A) {
-            return curr === 50 ? 150 : 50;
+            return curr === 58 ? 47 : 58;
           }
 
           if (currentCell === CELL_TYPES.PORTAL_B) {
-            return curr === 100 ? 250 : 100;
+            return curr === 7 ? 34 : 7;
           }
 
           return curr;

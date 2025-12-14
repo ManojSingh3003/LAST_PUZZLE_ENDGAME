@@ -1,4 +1,4 @@
-export const GRID_SIZE = 20;
+export const GRID_SIZE = 8;
 
 export const MAX_DRILLS = 2;
 export const GAME_MODES = {

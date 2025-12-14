@@ -6,7 +6,7 @@ import { useGameLogic } from './hooks/useGameLogic';
 import { GAME_MODES } from './constants';
 import { saveScore, getLeaderboard } from './services/leaderboard';
 
-// View States
+
 const VIEWS = {
   MENU: 'MENU',
   GAME: 'GAME',
@@ -17,13 +17,13 @@ const VIEWS = {
 export default function App() {
   const [currentView, setCurrentView] = useState(VIEWS.MENU);
   
-  // Hooks
+  // --- Game Logic Hooks ---
   const { 
     grid, playerPos, gameWon, drills, mode, switchMode, 
-    uniqueSteps, par, timeElapsed, loadLevel // You need to expose loadLevel in hook (see Step 3)
+    uniqueSteps, par, timeElapsed, loadLevel 
   } = useGameLogic();
 
-  // Leaderboard State
+  // --- UI State: Leaderboard & Scoring ---
   const [username, setUsername] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSaved, setHasSaved] = useState(false);
@@ -33,7 +33,7 @@ export default function App() {
   const targetMoves = mode === GAME_MODES.NO_WALL_BREAK ? par.noBreak : par.withBreak;
   const formatTime = (s) => (typeof s === 'number' ? s.toFixed(2) : '0.00');
 
-  // --- Handlers ---
+  // --- View & Data Handlers ---
 
   const handleStartGame = () => setCurrentView(VIEWS.GAME);
   const handleOpenEditor = () => setCurrentView(VIEWS.EDITOR);
@@ -45,7 +45,7 @@ export default function App() {
     setCurrentView(VIEWS.GAME);
   };
 
-  // Leaderboard Logic 
+  // --- Effects ---
   useEffect(() => { if (showLeaderboard) loadLeaderboard(); }, [showLeaderboard, mode]);
   useEffect(() => { setHasSaved(false); setUsername(''); }, [gameWon, mode]);
   
@@ -95,7 +95,7 @@ export default function App() {
     return <LevelBrowser onPlay={handlePlayLevel} onBack={handleBackToMenu} />;
   }
 
-  // --- RENDER: GAME (Existing Game UI) ---
+  // --- RENDER: GAME UI ---
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-white bg-gray-950 p-4">
       <div className="flex w-full max-w-2xl justify-between items-center mb-4">
@@ -104,17 +104,44 @@ export default function App() {
         <div className="w-20"></div>
       </div>
 
+      {/* --- Mode Switching Controls --- */}
       <div className="flex flex-wrap gap-4 mb-6 justify-center">
         <div className="flex gap-2 bg-gray-900 p-2 rounded-xl border border-gray-800">
-          <button onClick={() => switchMode(GAME_MODES.NO_WALL_BREAK)} className={`px-4 py-2 rounded-lg font-bold ${mode === GAME_MODES.NO_WALL_BREAK ? 'bg-red-600 text-white' : 'text-gray-400'}`}>No Wall Break</button>
-          <button onClick={() => switchMode(GAME_MODES.WALL_BREAK)} className={`px-4 py-2 rounded-lg font-bold ${mode === GAME_MODES.WALL_BREAK ? 'bg-blue-600 text-white' : 'text-gray-400'}`}>Wall Break</button>
+          {/* Button 1: No Wall Break (Disabled if Impossible) */}
+          <button
+            onClick={() => switchMode(GAME_MODES.NO_WALL_BREAK)}
+            
+            disabled={par.noBreak === Infinity || par.noBreak === -1}
+            className={`px-4 py-2 rounded-lg font-bold transition-all ${
+              mode === GAME_MODES.NO_WALL_BREAK 
+                ? 'bg-red-600 text-white shadow-lg' 
+                : (par.noBreak === Infinity || par.noBreak === -1)
+                  ? 'bg-gray-800 text-gray-500 cursor-not-allowed opacity-50'
+                  : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            {(par.noBreak === Infinity || par.noBreak === -1) ? "⛔ Impossible" : "No Wall Break"}
+          </button>
+
+          {/* Button 2: Wall Break */}
+          <button
+            onClick={() => switchMode(GAME_MODES.WALL_BREAK)}
+            className={`px-4 py-2 rounded-lg font-bold transition-all ${
+              mode === GAME_MODES.WALL_BREAK 
+                ? 'bg-blue-600 text-white shadow-lg' 
+                : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            Wall Break
+          </button>
         </div>
-        <button onClick={() => setShowLeaderboard(!showLeaderboard)} className="px-6 py-2 rounded-xl font-bold bg-purple-600 border border-purple-400">
+        
+        <button onClick={() => setShowLeaderboard(!showLeaderboard)} className="px-6 py-2 rounded-xl font-bold bg-purple-600 border border-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.5)]">
           {showLeaderboard ? "Close" : "🏆 Leaders"}
         </button>
       </div>
 
-      {/* Leaderboard Modal  */}
+      {/* --- Leaderboard Modal --- */}
       {showLeaderboard && (
         <div className="mb-8 w-full max-w-2xl bg-gray-900/90 border border-purple-500 rounded-xl p-6 shadow-2xl z-10 absolute top-20">
           <h2 className="text-2xl font-bold mb-4 text-center text-purple-300">🏆 Leaderboard</h2>
@@ -130,14 +157,14 @@ export default function App() {
         </div>
       )}
 
-      {/* HUD */}
+      {/* --- HUD --- */}
       <div className="flex flex-wrap justify-center gap-6 mb-6 text-xl bg-gray-900/50 p-4 rounded-lg border border-gray-700 w-full max-w-2xl">
         <div className="text-gray-400">TIME: <span className="text-yellow-400 font-bold ml-2 font-mono">{formatTime(timeElapsed)}s</span></div>
         <div className="text-gray-400">STEPS: <span className={`font-bold ml-2 ${uniqueSteps <= targetMoves ? 'text-green-400' : 'text-orange-400'}`}>{uniqueSteps}</span> <span className="text-sm">/ {targetMoves}</span></div>
         {mode === GAME_MODES.WALL_BREAK && <div className={`${drills > 0 ? 'text-blue-400' : 'text-red-500'}`}>DRILLS: <b>{drills}</b></div>}
       </div>
 
-      {/* WIN SCREEN */}
+      {/* --- Win Screen --- */}
       {gameWon && (
         <div className="mb-6 p-6 bg-green-900/90 border border-green-500 text-green-100 rounded-xl text-center shadow-2xl animate-float">
           <div className="text-3xl font-bold mb-4">LEVEL COMPLETED!</div>

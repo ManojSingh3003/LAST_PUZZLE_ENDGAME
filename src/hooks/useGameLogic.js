@@ -105,11 +105,11 @@ export function useGameLogic() {
       const row = Math.floor(playerPos / GRID_SIZE);
       const col = playerPos % GRID_SIZE;
 
-      if (e.key === 'ArrowUp' && row > 0) next -= GRID_SIZE;
-      if (e.key === 'ArrowDown' && row < GRID_SIZE - 1) next += GRID_SIZE;
-      if (e.key === 'ArrowLeft' && col > 0) next -= 1;
-      if (e.key === 'ArrowRight' && col < GRID_SIZE - 1) next += 1;
-
+      
+      if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') && row > 0) next -= GRID_SIZE;
+      if ((e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') && row < GRID_SIZE - 1) next += GRID_SIZE;
+      if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && col > 0) next -= 1;
+      if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && col < GRID_SIZE - 1) next += 1;
       if (next === playerPos) return; 
 
       const nextCell = grid[next];

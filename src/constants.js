@@ -10,15 +10,18 @@ export const CELL_TYPES = {
   WALL: 1,
   START: 2,
   GOAL: 3,
-  PORTAL_A: 4, // Red
-  PORTAL_B: 5, // Blue
+  PORTAL_A: 4, // Orange
+  PORTAL_B: 5, // Purple
+  PORTAL_C: 6, // Cyan 
+  PORTAL_D: 7, // Emerald 
+  PORTAL_E: 8  // Rose 
 };
 
-export const PORTAL_PAIRS = {
-  // Red Portals
-  47: 58,
-  58: 47,
-  // Blue Portals
-  7: 34,
-  34: 7
-};
+// export const PORTAL_PAIRS = {
+//   // Red Portals
+//   47: 58,
+//   58: 47,
+//   // Blue Portals
+//   7: 34,
+//   34: 7
+// };

@@ -4,12 +4,15 @@ import { calculateLevelPar } from '../utils/pathfinding';
 import { publishLevel } from '../services/levels';
 
 const PALETTE = [
-  { id: CELL_TYPES.EMPTY, label: 'Path (Clear)', color: 'bg-gray-800' },
+  { id: CELL_TYPES.EMPTY, label: 'Path', color: 'bg-gray-800' },
   { id: CELL_TYPES.WALL, label: 'Wall', color: 'bg-gray-600' },
   { id: CELL_TYPES.START, label: 'Start', color: 'bg-blue-500' },
   { id: CELL_TYPES.GOAL, label: 'Goal', color: 'bg-green-500' },
-  { id: CELL_TYPES.PORTAL_A, label: 'Portal A (Orange)', color: 'bg-orange-500' },
-  { id: CELL_TYPES.PORTAL_B, label: 'Portal B (Purple)', color: 'bg-purple-500' },
+  { id: CELL_TYPES.PORTAL_A, label: 'Portal A', color: 'bg-orange-500' },
+  { id: CELL_TYPES.PORTAL_B, label: 'Portal B', color: 'bg-purple-500' },
+  { id: CELL_TYPES.PORTAL_C, label: 'Portal C', color: 'bg-cyan-500' },
+  { id: CELL_TYPES.PORTAL_D, label: 'Portal D', color: 'bg-emerald-600' },
+  { id: CELL_TYPES.PORTAL_E, label: 'Portal E', color: 'bg-rose-500' },
 ];
 
 export default function LevelEditor({ onBack }) {
@@ -46,9 +49,16 @@ export default function LevelEditor({ onBack }) {
     if (!levelName.trim()) return setMessage("❌ Error: Level name is required.");
 
     // 2. Validate Portals (Must be pairs)
-    const countA = grid.filter(c => c === CELL_TYPES.PORTAL_A).length;
-    const countB = grid.filter(c => c === CELL_TYPES.PORTAL_B).length;
-    if (countA % 2 !== 0 || countB % 2 !== 0) return setMessage("❌ Error: Portals must be in pairs (2, 4, etc).");
+    const portals = [
+       CELL_TYPES.PORTAL_A, CELL_TYPES.PORTAL_B, 
+       CELL_TYPES.PORTAL_C, CELL_TYPES.PORTAL_D, CELL_TYPES.PORTAL_E
+    ];
+    for (let pType of portals) {
+       const count = grid.filter(c => c === pType).length;
+       if (count !== 0 && count !== 2) {
+          return setMessage(`❌ Error: Portal ${String.fromCharCode(65 + (pType - 4))} must have exactly 2 ends.`);
+       }
+    }
 
     // 3. Automatic Validation (Pathfinding)
     const scores = calculateLevelPar(grid, kValue);

@@ -1,4 +1,4 @@
-import { GRID_SIZE, CELL_TYPES, PORTAL_PAIRS } from '../constants';
+import { GRID_SIZE, CELL_TYPES } from '../constants';
 
 export function calculateLevelPar(grid, maxDrills) {
   const startPos = grid.indexOf(CELL_TYPES.START);
@@ -9,7 +9,7 @@ export function calculateLevelPar(grid, maxDrills) {
   const visited = new Set();
   visited.add(`${startPos}-0`);
 
-  let minStepsNoBreak = -1;
+  let minStepsNoBreak = -1; 
   let minStepsWithBreak = -1;
 
   while (queue.length > 0) {
@@ -29,13 +29,21 @@ export function calculateLevelPar(grid, maxDrills) {
     const row = Math.floor(pos / GRID_SIZE);
     const col = pos % GRID_SIZE;
 
+    // Standard Moves
     if (row > 0) neighbors.push(pos - GRID_SIZE); // Up
     if (row < GRID_SIZE - 1) neighbors.push(pos + GRID_SIZE); // Down
     if (col > 0) neighbors.push(pos - 1); // Left
     if (col < GRID_SIZE - 1) neighbors.push(pos + 1); // Right
     
-    if (PORTAL_PAIRS[pos] !== undefined) {
-      neighbors.push(PORTAL_PAIRS[pos]);
+
+    const currentCell = grid[pos];
+    if (currentCell >= CELL_TYPES.PORTAL_A && currentCell <= CELL_TYPES.PORTAL_E) {
+     
+      grid.forEach((cell, index) => {
+        if (cell === currentCell && index !== pos) {
+          neighbors.push(index);
+        }
+      });
     }
 
     for (const next of neighbors) {
@@ -44,6 +52,7 @@ export function calculateLevelPar(grid, maxDrills) {
       const drillsNeeded = isWall ? drills + 1 : drills;
 
       if (drillsNeeded <= maxDrills) {
+        // We track state as "position-drillsUsed"
         const key = `${next}-${drillsNeeded}`;
         
         if (!visited.has(key)) {
@@ -58,5 +67,9 @@ export function calculateLevelPar(grid, maxDrills) {
     }
   }
 
-  return { minStepsNoBreak, minStepsWithBreak };
+  
+  return { 
+    minStepsNoBreak: minStepsNoBreak === -1 ? Infinity : minStepsNoBreak, 
+    minStepsWithBreak: minStepsWithBreak === -1 ? Infinity : minStepsWithBreak 
+  };
 }

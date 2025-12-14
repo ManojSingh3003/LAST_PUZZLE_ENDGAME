@@ -101,19 +101,19 @@ export function useGameLogic() {
       // --- Teleport Logic ---
       if (e.key === 'Enter') {
         const currentCell = grid[playerPos];
-        let dest = -1;
+        
+        if (currentCell >= CELL_TYPES.PORTAL_A && currentCell <= CELL_TYPES.PORTAL_E) {
 
-        if (currentCell === CELL_TYPES.PORTAL_A) {
-           const allAs = grid.map((c, i) => c === CELL_TYPES.PORTAL_A ? i : -1).filter(i => i !== -1);
-           dest = allAs.find(i => i !== playerPos);
-        } else if (currentCell === CELL_TYPES.PORTAL_B) {
-           const allBs = grid.map((c, i) => c === CELL_TYPES.PORTAL_B ? i : -1).filter(i => i !== -1);
-           dest = allBs.find(i => i !== playerPos);
-        }
+           const matchingPortals = grid
+              .map((c, i) => c === currentCell ? i : -1)
+              .filter(i => i !== -1);
+           
+           const dest = matchingPortals.find(i => i !== playerPos);
 
-        if (dest !== undefined && dest !== -1) {
-           setPlayerPos(dest);
-           setVisitedCells(prev => new Set(prev).add(dest));
+           if (dest !== undefined) {
+              setPlayerPos(dest);
+              setVisitedCells(prev => new Set(prev).add(dest));
+           }
         }
         return; 
       }

@@ -23,7 +23,7 @@ export default function App() {
   } = useGameLogic();
 
   // --- UI State: Leaderboard & Scoring ---
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState(localStorage.getItem('portal_username') || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSaved, setHasSaved] = useState(false);
   const [leaderboardData, setLeaderboardData] = useState([]);
@@ -53,7 +53,7 @@ export default function App() {
     if (showLeaderboard) loadLeaderboard(); 
   }, [showLeaderboard, mode, currentLevelId]); // Reload when map changes
 
-  useEffect(() => { setHasSaved(false); setUsername(''); }, [gameWon, mode]);
+  useEffect(() => { setHasSaved(false); }, [gameWon, mode]);
   
   const loadLeaderboard = async () => {
     // Fetch scores specific to this map ID
@@ -65,6 +65,7 @@ export default function App() {
     if (!username.trim()) return;
     setIsSubmitting(true);
 
+    localStorage.setItem('portal_username', username);
     // Save score with Level ID
     const success = await saveScore(username, mode, uniqueSteps, timeElapsed, currentLevelId);
     if (success) { setHasSaved(true); if (showLeaderboard) loadLeaderboard(); }
@@ -121,15 +122,17 @@ export default function App() {
           <button
             onClick={() => switchMode(GAME_MODES.NO_WALL_BREAK)}
             disabled={par.noBreak === Infinity || par.noBreak === -1}
+  
+            title={(par.noBreak === Infinity || par.noBreak === -1) ? "This level cannot be solved without drilling walls." : "Switch to No-Break Mode"}
             className={`px-4 py-2 rounded-lg font-bold transition-all ${
               mode === GAME_MODES.NO_WALL_BREAK 
-                ? 'bg-red-600 text-white shadow-lg' 
-                : (par.noBreak === Infinity || par.noBreak === -1)
-                  ? 'bg-gray-800 text-gray-500 cursor-not-allowed opacity-50'
-                  : 'text-gray-400 hover:text-white'
+              ? 'bg-red-600 text-white shadow-lg' 
+              : (par.noBreak === Infinity || par.noBreak === -1)
+                ? 'bg-gray-800 text-gray-500 cursor-not-allowed opacity-50 border border-gray-700' // Added border
+                : 'text-gray-400 hover:text-white'
             }`}
           >
-            {(par.noBreak === Infinity || par.noBreak === -1) ? "⛔ Impossible" : "No Wall Break"}
+          {(par.noBreak === Infinity || par.noBreak === -1) ? "⛔ Impossible" : "No Wall Break"}
           </button>
 
           {/* Button 2: Wall Break */}

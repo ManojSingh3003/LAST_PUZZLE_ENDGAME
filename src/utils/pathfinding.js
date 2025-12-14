@@ -1,75 +1,98 @@
 import { GRID_SIZE, CELL_TYPES } from '../constants';
 
-export function calculateLevelPar(grid, maxDrills) {
+// Dedicated function to solve the maze for a specific drill limit
+const solveLevelBFS = (grid, maxDrillsAllowed) => {
   const startPos = grid.indexOf(CELL_TYPES.START);
   const goalPos = grid.indexOf(CELL_TYPES.GOAL);
 
-  const queue = [{ pos: startPos, drills: 0, steps: 0 }];
+  if (startPos === -1 || goalPos === -1) return Infinity;
+
+  // Queue stores: { pos, steps, drillsUsed }
+  const queue = [{ pos: startPos, steps: 0, drillsUsed: 0 }];
   
+  // Visited set keys: "position-drillsUsed"
   const visited = new Set();
   visited.add(`${startPos}-0`);
 
-  let minStepsNoBreak = -1; 
-  let minStepsWithBreak = -1;
-
   while (queue.length > 0) {
-    const { pos, drills, steps } = queue.shift();
+    const { pos, steps, drillsUsed } = queue.shift();
 
-    if (pos === goalPos) {
-      if (drills === 0 && minStepsNoBreak === -1) {
-        minStepsNoBreak = steps;
+    if (pos === goalPos) return steps; 
+
+    // --- 1. Process Teleportation (Zero-Step) ---
+    const currentCell = grid[pos];
+    if (currentCell >= CELL_TYPES.PORTAL_A && currentCell <= CELL_TYPES.PORTAL_E) {
+      
+      let dest = -1;
+      grid.forEach((cell, index) => {
+        if (cell === currentCell && index !== pos) {
+          dest = index;
+        }
+      });
+
+      if (dest !== -1) {
+        const key = `${dest}-${drillsUsed}`;
+        if (!visited.has(key)) {
+          visited.add(key);
+          // Teleport is instant: steps and drillsUsed remain the same
+          queue.push({ pos: dest, steps: steps, drillsUsed: drillsUsed });
+        }
       }
-      if (minStepsWithBreak === -1) {
-        minStepsWithBreak = steps;
-      }
-      if (minStepsNoBreak !== -1 && minStepsWithBreak !== -1) break;
     }
 
+    // --- 2. Process Standard Moves (One-Step) ---
     const neighbors = [];
     const row = Math.floor(pos / GRID_SIZE);
     const col = pos % GRID_SIZE;
 
-    // Standard Moves
-    if (row > 0) neighbors.push(pos - GRID_SIZE); // Up
-    if (row < GRID_SIZE - 1) neighbors.push(pos + GRID_SIZE); // Down
-    if (col > 0) neighbors.push(pos - 1); // Left
-    if (col < GRID_SIZE - 1) neighbors.push(pos + 1); // Right
+    if (row > 0) neighbors.push(pos - GRID_SIZE);
+    if (row < GRID_SIZE - 1) neighbors.push(pos + GRID_SIZE);
+    if (col > 0) neighbors.push(pos - 1);
+    if (col < GRID_SIZE - 1) neighbors.push(pos + 1);
     
-
-    const currentCell = grid[pos];
-    if (currentCell >= CELL_TYPES.PORTAL_A && currentCell <= CELL_TYPES.PORTAL_E) {
-     
-      grid.forEach((cell, index) => {
-        if (cell === currentCell && index !== pos) {
-          neighbors.push(index);
-        }
-      });
-    }
-
     for (const next of neighbors) {
-      const isWall = grid[next] === CELL_TYPES.WALL;
+      const nextType = grid[next];
+      let newDrillsUsed = drillsUsed;
+      let canMove = true;
 
-      const drillsNeeded = isWall ? drills + 1 : drills;
+      if (nextType === CELL_TYPES.WALL) {
+        // If it's a wall, check if we are allowed to drill it
+        if (drillsUsed < maxDrillsAllowed) {
+          newDrillsUsed = drillsUsed + 1;
+        } else {
+          canMove = false; // Cannot drill, so cannot move through the wall
+        }
+      } 
 
-      if (drillsNeeded <= maxDrills) {
-        // We track state as "position-drillsUsed"
-        const key = `${next}-${drillsNeeded}`;
+      if (canMove) {
+        const key = `${next}-${newDrillsUsed}`;
         
         if (!visited.has(key)) {
           visited.add(key);
           queue.push({ 
             pos: next, 
-            drills: drillsNeeded, 
-            steps: steps + 1 
+            steps: steps + 1,
+            drillsUsed: newDrillsUsed
           });
         }
       }
     }
   }
 
+  return Infinity;
+};
+
+
+export function calculateLevelPar(grid, maxDrills) {
   
+  // 1. Calculate No Break Path (Max Drills allowed = 0)
+  const minStepsNoBreak = solveLevelBFS(grid, 0);
+
+  // 2. Calculate With Break Path (Max Drills allowed = maxDrills)
+  const minStepsWithBreak = solveLevelBFS(grid, maxDrills);
+
   return { 
-    minStepsNoBreak: minStepsNoBreak === -1 ? Infinity : minStepsNoBreak, 
-    minStepsWithBreak: minStepsWithBreak === -1 ? Infinity : minStepsWithBreak 
+    minStepsNoBreak: minStepsNoBreak, 
+    minStepsWithBreak: minStepsWithBreak 
   };
 }

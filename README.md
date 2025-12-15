@@ -24,7 +24,9 @@ The game requires players to navigate complex grid environments using movement, 
     * **Endgame Mode (Wall Break):** Strategic resource management allowing up to $K$ wall breaks to find shortcuts.
 * **Teleportation Mechanics:** Zero-cost traversal via color-matched portal pairs.
 * **Internal Path Analysis:** The game runs a background algorithm to calculate the optimal path (Par Score) for every level.
-* **Level Editor (Optional Feature):** A fully functional editor allowing users to create, validate, and publish their own maps.
+* **Persistent Player Identity:**
+    * **Automatic Username Loading:** Once a user give their name, their display name is automatically loaded and associated with their score submissions. This eliminates the need to manually enter a name for every leaderboard entry or level publication.
+* **Level Editor :** A fully functional editor allowing users to create, validate, and publish their own maps.
 * **Auto-Validation:** Custom logic ensures no user map is broken or unsolvable before publishing.
 
 ---
@@ -43,6 +45,7 @@ Before a map is saved in the Editor, the engine runs three checks:
 1.  **Is GOAL reachable?**
 2.  **What is the shortest path with $K=0$?**
 3.  **What is the shortest path with $K \le Max$?**
+   
 *If the map is unsolvable, the "Publish" button remains locked.*
 
 ---

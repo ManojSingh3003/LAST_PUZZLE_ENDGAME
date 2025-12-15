@@ -9,7 +9,7 @@
 | **Play Online** | **Video Demo** |
 | :---: | :---: |
 | [**👉 Click Here to Play Last Puzzle Endgame**](https://glittery-narwhal-e3df0b.netlify.app/) | [**📺 Watch Gameplay Video**](https://www.flexclip.com/share/14876450OVcSNhTnPByReGsEjYWNYMWzIqGRYZWu.html) |
-> *Deployed on Netlify in accordance with Judging Criteria #6*
+> *For best experience play in zoom 80%.*
 
 ---
 
@@ -94,5 +94,5 @@ Open http://localhost:5173 in your browser.
 
 # 🤝 Contribution
 Developed by Manbendra Singh |2024UGEE067
-Created during the 48-hour HACKSPHERE Coding Challenge.
+Created with ❤️ during the 48-hour HACKSPHERE Coding Challenge.
 

@@ -8,7 +8,7 @@
 ## 🚀 Play Now (Live Deployment)
 | **Play Online** | **Video Demo** |
 | :---: | :---: |
-| [**👉 Click Here to Play Last Puzzle Endgame**](https://glittery-narwhal-e3df0b.netlify.app/) | [**📺 Watch Gameplay Video**](INSERT_YOUR_VIDEO_LINK_HERE) |
+| [**👉 Click Here to Play Last Puzzle Endgame**](https://glittery-narwhal-e3df0b.netlify.app/) | [**📺 Watch Gameplay Video**](https://www.flexclip.com/share/14876450OVcSNhTnPByReGsEjYWNYMWzIqGRYZWu.html) |
 > *Deployed on Netlify in accordance with Judging Criteria #6*
 
 ---

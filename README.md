@@ -88,6 +88,7 @@ VITE_FIREBASE_AUTH_DOMAIN="your_domain"
 VITE_FIREBASE_PROJECT_ID="your_project_id"
 # Add other standard Firebase config keys here
 ```
+*Note: if not working you should check your indexes in firebase and initialized them by going to console(press F12) and then click on the link poping in red error it will initialize the indexes. *
 
 ### 4. Run Locally
 ```bash

@@ -88,6 +88,6 @@ npm run dev
 Open http://localhost:5173 in your browser.
 
 🤝 Contribution
-Developed by [Manoj Singh / Team Name]
+Developed by Manbendra Singh |2024UGEE067
 Created during the 48-hour HACKSPHERE Coding Challenge.
 

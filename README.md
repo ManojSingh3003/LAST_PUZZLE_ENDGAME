@@ -73,6 +73,8 @@ Follow these steps to run the code locally for review.
 ### 1. Clone the Repository
 ```bash
 git clone https://github.com/ManojSingh3003/LAST_PUZZLE_ENDGAME.git
+
+cd LAST_PUZZLE_ENDGAME
 ```
 ### 2. Install Dependencies
 ```bash

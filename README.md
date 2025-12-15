@@ -71,23 +71,28 @@ Follow these steps to run the code locally for review.
 ```bash
 git clone [https://github.com/Manojsingh3003/LAST_PUZZLE_ENDGAME.git](https://github.com/Manojsingh3003/LAST_PUZZLE_ENDGAME.git)
 cd LAST_PUZZLE_ENDGAME
-
-2. Install Dependencies
+```
+### 2. Install Dependencies
+```bash
 npm install
-
-3. Configure Environment
+```
+### 3. Configure Environment
+``` bash
 Create a .env file in the root folder. You must add Firebase credentials to enable the Level Editor and Leaderboard features.
 VITE_FIREBASE_API_KEY="your_key"
 VITE_FIREBASE_AUTH_DOMAIN="your_domain"
 VITE_FIREBASE_PROJECT_ID="your_project_id"
 # Add other standard Firebase config keys here
+```
 
-4. Run Locally
+### 4. Run Locally
+```bash
 npm run dev
 
 Open http://localhost:5173 in your browser.
+```
 
-🤝 Contribution
+# 🤝 Contribution
 Developed by Manbendra Singh |2024UGEE067
 Created during the 48-hour HACKSPHERE Coding Challenge.
 

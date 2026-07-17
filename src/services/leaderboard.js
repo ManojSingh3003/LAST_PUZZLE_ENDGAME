@@ -19,7 +19,7 @@ export const saveScore = async (username, mode, steps, time, levelId) => {
       mode: mode,
       uniqueSteps: steps,
       timeElapsed: parseFloat(time),
-      levelId: levelId || 'default', // Save the specific Level ID
+      levelId: levelId || 'default', 
       createdAt: serverTimestamp(),
     });
     return true;
@@ -34,7 +34,7 @@ export const getLeaderboard = async (mode, levelId) => {
     const q = query(
       collection(db, LEADERBOARD_COLLECTION),
       where("mode", "==", mode),
-      where("levelId", "==", levelId || 'default'), // Filter by Level ID
+      where("levelId", "==", levelId || 'default'), 
       orderBy("uniqueSteps", "asc"), 
       orderBy("timeElapsed", "asc"), 
       limit(10)

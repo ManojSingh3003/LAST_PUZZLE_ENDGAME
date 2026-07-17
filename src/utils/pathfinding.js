@@ -30,16 +30,15 @@ const solveLevelBFS = (grid, maxDrillsAllowed) => {
       if (dest !== -1) {
         const key = `${dest}-${drillsUsed}`;
         if (!visited.has(key)) {
+
           visited.add(key);
-          // Changed from steps to steps + 1 to account for the un-modeled step cost 
-          // that creates the 2-step difference in the final par calculation.
-          // Zero-cost moves should be pushed to the FRONT (unshift) for 0-1 BFS robustness.
+          
           queue.push({ pos: dest, steps: steps + 1, drillsUsed: drillsUsed });
         }
       }
     }
 
-    // --- 2. Process Standard Moves (One-Step) ---
+    
     const neighbors = [];
     const row = Math.floor(pos / GRID_SIZE);
     const col = pos % GRID_SIZE;

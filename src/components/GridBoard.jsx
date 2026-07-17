@@ -37,12 +37,11 @@ export default function GridBoard({ grid, playerPos, lastDrilledPos }) {
     >
       {grid.map((cellType, index) => {
         const isPlayerHere = playerPos === index;
-      //Check for Wall Break Flash
+      
         const isDrillFlash = lastDrilledPos === index;
         
         let extraClass = '';
-        if (isDrillFlash) {
-            
+        if (isDrillFlash) {       
             extraClass = 'bg-red-400 shadow-xl shadow-red-500/80 transition-none duration-0'; 
         }
 

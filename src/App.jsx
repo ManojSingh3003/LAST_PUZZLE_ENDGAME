@@ -35,7 +35,7 @@ export default function App() {
   // --- View & Data Handlers ---
 
   const handleStartGame = () => {
-    loadClassicLevel(); // Reset to default map
+    loadClassicLevel();
     setCurrentView(VIEWS.GAME);
   };
   const handleOpenEditor = () => setCurrentView(VIEWS.EDITOR);

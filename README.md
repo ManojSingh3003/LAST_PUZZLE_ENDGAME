@@ -11,7 +11,7 @@
 
 | 🚀 Play Online | 📺 Video Demo |
 | :---: | :---: |
-| [**👉 Click Here to Play**](https://glittery-narwhal-e3df0b.netlify.app/) | [**🍿 Watch Gameplay**](https://www.flexclip.com/share/14876450OVcSNhTnPByReGsEjYWNYMWzIqGRYZWu.html) |
+| [**👉 Click Here to Play**](https://manojsingh3003.github.io/LAST_PUZZLE_ENDGAME/) | [**🍿 Watch Gameplay**](https://www.flexclip.com/share/14876450OVcSNhTnPByReGsEjYWNYMWzIqGRYZWu.html) |
 
 *For the best experience, please set your browser zoom to 80%.*
 
